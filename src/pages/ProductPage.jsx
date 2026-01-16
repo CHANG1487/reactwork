@@ -1,47 +1,45 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
-const API_BASE = "https://ec-course-api.hexschool.io/v2";
-const API_PATH = "lika-reactwork";
+const API_BASE = import.meta.env.VITE_API_BASE;
+const API_PATH = import.meta.env.VITE_API_PATH;
 
 function ProductPage() {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [tempProduct, setTempProduct] = useState(null);
 
+  const getProducts = useCallback(async () => {
+    try {
+      const res = await axios.get(
+        `${API_BASE}/api/${API_PATH}/admin/products/all`
+      );
+      setProducts(Object.values(res.data.products));
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "取得產品列表失敗",
+        text: error.response?.data?.message || "未知錯誤",
+      });
+    }
+  }, []);
+
+  const checkLogin = useCallback(async () => {
+    try {
+      await axios.post(`${API_BASE}/api/user/check`);
+      getProducts();
+    } catch {
+      Swal.fire({
+        text: "請重新登入",
+      }).then(() => {
+        navigate("/");
+      });
+    }
+  }, [getProducts, navigate]);
+
   useEffect(() => {
-    const getProducts = async () => {
-      try {
-        const res = await axios.get(
-          `${API_BASE}/api/${API_PATH}/admin/products/all`
-        );
-        setProducts(Object.values(res.data.products));
-      } catch (error) {
-        Swal.fire({
-          icon: "error",
-          title: "取得產品列表失敗",
-          text: error.response?.data?.message || "未知錯誤",
-        });
-      }
-    };
-
-    const checkLogin = async () => {
-      try {
-        await axios.post(`${API_BASE}/api/user/check`);
-        getProducts();
-      } catch (error) {
-        Swal.fire({
-          icon: "error",
-          title: "驗證失效",
-          text: "請重新登入",
-        }).then(() => {
-          navigate("/");
-        });
-      }
-    };
-
     const token = document.cookie
       .split("; ")
       .find((row) => row.startsWith("hexToken="))
@@ -55,7 +53,7 @@ function ProductPage() {
     }
     axios.defaults.headers.common["Authorization"] = token;
     checkLogin();
-  }, [navigate]);
+  }, [checkLogin, navigate]);
 
   return (
     <div className="container">
@@ -116,17 +114,11 @@ function ProductPage() {
                 </h5>
                 <p className="card-text">
                   商品描述：
-                  <span
-                    dangerouslySetInnerHTML={{
-                      __html: tempProduct.description,
-                    }}
-                  ></span>
+                  <span>{tempProduct.description}</span>
                 </p>
                 <p className="card-text">
                   商品內容：
-                  <span
-                    dangerouslySetInnerHTML={{ __html: tempProduct.content }}
-                  ></span>
+                  <span>{tempProduct.content}</span>
                 </p>
                 <div className="d-flex">
                   <p className="card-text text-secondary">

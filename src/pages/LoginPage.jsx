@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
-const API_BASE = "https://ec-course-api.hexschool.io/v2";
+const API_BASE = import.meta.env.VITE_API_BASE;
 
 function LoginPage() {
   const navigate = useNavigate();
