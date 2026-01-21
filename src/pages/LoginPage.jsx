@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
 const API_BASE = import.meta.env.VITE_API_BASE;
+const API_PATH = import.meta.env.VITE_API_PATH;
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -37,6 +38,32 @@ function LoginPage() {
       });
     }
   };
+
+  const checkLogin = useCallback(async () => {
+    const token = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("hexToken="))
+      ?.split("=")
+      .slice(1)
+      .join("=");
+
+    if (!token) {
+      return;
+    }
+
+    axios.defaults.headers.common["Authorization"] = token;
+
+    try {
+      await axios.post(`${API_BASE}/api/user/check`);
+      navigate("/products");
+    } catch {
+      // If check fails, do nothing, let the login form remain
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    checkLogin();
+  }, [checkLogin]);
 
   return (
     <div className="container login">

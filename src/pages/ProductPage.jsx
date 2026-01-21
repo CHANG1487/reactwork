@@ -114,11 +114,11 @@ function ProductPage() {
                 </h5>
                 <p className="card-text">
                   商品描述：
-                  <span>{tempProduct.description}</span>
+{tempProduct.description}
                 </p>
                 <p className="card-text">
                   商品內容：
-                  <span>{tempProduct.content}</span>
+{tempProduct.content}
                 </p>
                 <div className="d-flex">
                   <p className="card-text text-secondary">
